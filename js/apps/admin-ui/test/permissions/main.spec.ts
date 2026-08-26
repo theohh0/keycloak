@@ -170,6 +170,40 @@ test.describe.serial("Permissions section tests", () => {
     await deletePermission(page, "test-organization-permission");
   });
 
+  test("should edit organization permission", async ({ page }) => {
+    await clickCreatePermission(page);
+    await selectResource(page, "Organizations");
+    await fillPermissionForm(page, {
+      name: "test-organization-permission",
+      scopes: ["view"],
+      enforcementMode: "specificResources",
+    });
+    await pickOrganization(page, "one");
+    await pickOrganization(page, "two");
+
+    await clickCreateNewPolicy(page);
+    await fillPolicyForm(
+      page,
+      {
+        name: "test-policy2",
+        description: "test-description",
+        type: "User",
+        user: "test-user",
+      },
+      true,
+    );
+
+    await clickCreatePolicySaveButton(page);
+    await assertNotificationMessage(page, "Successfully created the policy");
+    await clickSaveButton(page);
+    await removeOrganization(page, "one");
+    await clickSaveButton(page);
+    await assertNotificationMessage(
+      page,
+      "Successfully updated the permission",
+    );
+  });
+
   test.describe.serial("evaluate permissions", () => {
     test.beforeAll(async () => {
       await adminClient.createUser({
